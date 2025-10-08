@@ -148,8 +148,8 @@ const todoSlice = createSlice({
           arg: { id },
         } = action.meta;
         if (id) {
-          state.userTodos = state.userTodos.filter((item) => item._id !== id);
-          state.todos = state.todos.filter((item) => item._id !== id);
+          state.userTodos = state.userTodos.filter((item) => item.id !== id);
+          state.todos = state.todos.filter((item) => item.id !== id);
         }
       })
       .addCase(deleteTodo.rejected, (state, action) => {
@@ -166,10 +166,10 @@ const todoSlice = createSlice({
         } = action.meta;
         if (id) {
           state.userTodos = state.userTodos.map((item) =>
-            item._id === id ? action.payload : item
+            item.id === id ? action.payload : item
           );
           state.todos = state.todos.map((item) =>
-            item._id === id ? action.payload : item
+            item.id === id ? action.payload : item
           );
         }
       })

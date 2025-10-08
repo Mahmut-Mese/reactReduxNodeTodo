@@ -1,5 +1,5 @@
 import express from "express";
-import mongoose from "mongoose";
+import sequelize from "./db.js";
 import cors from "cors";
 import morgan from "morgan";
 import userRouter from "./routes/user.js";
@@ -21,10 +21,10 @@ app.get("/", (req, res) => {
 });
 
 const port = process.env.PORT || 5000;
-const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://localhost:27017/todoapp'
-mongoose
-.connect(MONGODB_URL)
-.then(() => {
+sequelize
+  .authenticate()
+  .then(() => sequelize.sync())
+  .then(() => {
     app.listen(port, () => console.log(`Server running on port ${port}`));
   })
   .catch((error) => console.log(`${error} did not connect`));

@@ -1,19 +1,23 @@
-import TodoModal from "../models/todo.js";
-import mongoose from "mongoose";
+import Todo from "../models/todo.js";
+import sequelize from "../db.js";
 
 export const createTodo = async (req, res) => {
   const todo = req.body;
-  const newTodo = new TodoModal({
-    ...todo,
-    creator: req.userId,
-    createdAt: new Date().toISOString(),
-  });
-
+  
   try {
-    await newTodo.save();
+    const newTodo = await Todo.create({
+      ...todo,
+      creator: req.userId,
+    });
     res.status(201).json(newTodo);
   } catch (error) {
-    res.status(404).json({ message: "Something went wrong" });
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      sql: error.sql,
+      original: error.original
+    });
+    res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
 
@@ -22,8 +26,8 @@ export const createTodo = async (req, res) => {
 export const getTodo = async (req, res) => {
   const { id } = req.params;
   try {
-    const todo = await TodoModal.findById(id);
-    res.status(200).json(todo);
+    const todoItem = await Todo.findByPk(id);
+    res.status(200).json(todoItem);
   } catch (error) {
     res.status(404).json({ message: "Something went wrong" });
   }
@@ -33,13 +37,15 @@ export const getTodosByUser = async (req, res) => {
   console.log(req.query);
   const { id } = req.params;
   const { page } = req.query;
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(404).json({ message: "User doesn't exist" });
-  }
   const limit = 5;
   const startIndex = (Number(page) - 1) * limit;
-  const total = await TodoModal.countDocuments({});
-  const userTodos = await TodoModal.find({ creator: id }).limit(limit).skip(startIndex);
+  const total = await Todo.count();
+  const userTodos = await Todo.findAll({
+    where: { creator: id },
+    limit,
+    offset: startIndex,
+    order: [["created_at", "DESC"]],
+  });
   res.status(200).json({     data: userTodos,
     currentPage: Number(page),
     totalTodos: total,
@@ -49,10 +55,7 @@ export const getTodosByUser = async (req, res) => {
 export const deleteTodo = async (req, res) => {
   const { id } = req.params;
   try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).json({ message: `No todo exist with id: ${id}` });
-    }
-    await TodoModal.findByIdAndRemove(id);
+    await Todo.destroy({ where: { id } });
     res.json({ message: "Todo deleted successfully" });
   } catch (error) {
     res.status(404).json({ message: "Something went wrong" });
@@ -63,20 +66,12 @@ export const updateTodo = async (req, res) => {
   const { id } = req.params;
   const { title, description, creator, imageFile, tags } = req.body;
   try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).json({ message: `No todo exist with id: ${id}` });
-    }
-
-    const updatedTodo = {
-      creator,
-      title,
-      description,
-      tags,
-      imageFile,
-      _id: id,
-    };
-    await TodoModal.findByIdAndUpdate(id, updatedTodo, { new: true });
-    res.json(updatedTodo);
+    await Todo.update(
+      { creator, title, description, tags, imageFile },
+      { where: { id } }
+    );
+    const updated = await Todo.findByPk(id);
+    res.json(updated);
   } catch (error) {
     res.status(404).json({ message: "Something went wrong" });
   }
@@ -85,9 +80,16 @@ export const updateTodo = async (req, res) => {
 export const getTodosBySearch = async (req, res) => {
   const { searchQuery } = req.query;
   try {
-    const title = new RegExp(searchQuery, "i");
-    const todos = await TodoModal.find({ title });
-      res.json(todos);
+    const todos = await Todo.findAll({
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("title")),
+        "LIKE",
+        `%${String(searchQuery || "").toLowerCase()}%`
+      ),
+      limit: 25,
+      order: [["created_at", "DESC"]],
+    });
+    res.json(todos);
   } catch (error) {
     res.status(404).json({ message: "Something went wrong" });
   }

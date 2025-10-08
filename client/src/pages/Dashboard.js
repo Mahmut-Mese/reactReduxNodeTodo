@@ -31,7 +31,7 @@ const Dashboard = () => {
   const [currentTodos, setCurrent] = useState();
  
 
-  const userId = user?.result?._id;
+  const userId = user?.result?.id;
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -116,7 +116,7 @@ const Dashboard = () => {
       {currentTodos &&
         currentTodos.length > 0 &&
         currentTodos.map((item) => (
-          <MDBCardGroup key={item._id}>
+                <MDBCardGroup key={item.id}>
             <MDBCard style={{ maxWidth: "680px" }} className="mt-2">
               <MDBRow className="g-0">
                 <MDBCol md="3">
@@ -147,7 +147,7 @@ const Dashboard = () => {
                       }}
                     >
                       <MDBBtn className="mt-1 me-1" tag="a" color="none">
-                        <Link to={`/todo/${item._id}`}>
+                        <Link to={`/todo/${item.id}`}>
                           <MDBIcon
                             fas
                             icon="eye"
@@ -162,10 +162,10 @@ const Dashboard = () => {
                           icon="trash"
                           style={{ color: "#dd4b39" }}
                           size="lg"
-                          onClick={() => handleDelete(item._id)}
+                          onClick={() => handleDelete(item.id)}
                         />
                       </MDBBtn>
-                      <Link to={`/editTodo/${item._id}`}>
+                      <Link to={`/editTodo/${item.id}`}>
                         <MDBIcon
                           fas
                           icon="edit"

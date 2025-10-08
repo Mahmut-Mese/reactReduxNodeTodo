@@ -59,7 +59,7 @@ const SingleTodo = () => {
             <h3>{todo.title}</h3>
             <div style={{ float: "left" }}>
               <span className="text-start">
-                {todo && todo.tags && todo.tags.map((item) => `#${item} `)}
+                {todo && todo.tags && Array.isArray(todo.tags) && todo.tags.map((item) => `#${item} `)}
               </span>
             </div>
             <br />

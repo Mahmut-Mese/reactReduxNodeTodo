@@ -15,9 +15,12 @@ import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   const dispatch = useDispatch();
-  const user = JSON.parse(localStorage.getItem("profile"));
+  
   useEffect(() => {
-    dispatch(setUser(user));
+    const user = JSON.parse(localStorage.getItem("profile"));
+    if (user) {
+      dispatch(setUser(user));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

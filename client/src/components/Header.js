@@ -54,7 +54,7 @@ const Header = () => {
               </MDBNavbarLink>
             </MDBNavbarItem>
            
-            {user?.result?._id ? (
+            {user?.result?.id ? (
               <MDBNavbarItem>
                 <MDBNavbarLink href="/login">
                   <p className="header-text" onClick={() => handleLogout()}>

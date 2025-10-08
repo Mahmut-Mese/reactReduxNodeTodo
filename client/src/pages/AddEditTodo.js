@@ -9,7 +9,7 @@ import {
 import FileBase from "react-file-base64";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { createTodo, updateTodo } from "../redux/features/todoSlice";
+import { createTodo, updateTodo, getTodo } from "../redux/features/todoSlice";
 
 const initialState = {
   title: "",
@@ -20,7 +20,7 @@ const initialState = {
 const AddEditTodo = () => {
   const [todoData, setTodoData] = useState(initialState);
   const [tagErrMsg, setTagErrMsg] = useState(null);
-  const {  userTodos } = useSelector((state) => ({
+  const { userTodos, todo } = useSelector((state) => ({
     ...state.todo,
   }));
   const { user } = useSelector((state) => ({ ...state.auth }));
@@ -32,12 +32,37 @@ const AddEditTodo = () => {
 
   useEffect(() => {
     if (id) {
-      const singleTodo = userTodos.find((todo) => todo._id === id);
-      console.log(singleTodo);
-      setTodoData({ ...singleTodo });
+      let singleTodo = userTodos.find((todo) => todo.id === parseInt(id));
+      
+      if (!singleTodo) {
+        dispatch(getTodo(id));
+        return;
+      }
+      
+      if (singleTodo) {
+        const tagsArray = Array.isArray(singleTodo.tags) ? singleTodo.tags : 
+                         (typeof singleTodo.tags === 'string' ? singleTodo.tags.split(',').filter(tag => tag.trim()) : []);
+        setTodoData({ 
+          ...singleTodo, 
+          tags: tagsArray 
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (id && todo && todo.id === parseInt(id)) {
+      console.log('Todo fetched from API:', todo);
+      const tagsArray = Array.isArray(todo.tags) ? todo.tags : 
+                       (typeof todo.tags === 'string' ? todo.tags.split(',').filter(tag => tag.trim()) : []);
+      setTodoData({ 
+        ...todo, 
+        tags: tagsArray 
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todo, id]);
 
  
 
@@ -63,9 +88,10 @@ const AddEditTodo = () => {
   };
   const handleAddTag = (tag) => {
     const { name, value } = tag.target;
-
-    console.log(tag);
-    setTodoData({ ...todoData, [name]: value  });
+    
+    const tagsArray = value.split(',').map(tag => tag.trim()).filter(tag => tag);
+    
+    setTodoData({ ...todoData, [name]: tagsArray });
     setTagErrMsg(null);
   };
 
@@ -119,9 +145,9 @@ const AddEditTodo = () => {
               <MDBInput
                 type="text"
                  name="tags"
-                 placeholder="Enter Tag"
+                 placeholder="Enter Tags (comma-separated)"
                  className="form-control"
-                 value={tags}
+                 value={Array.isArray(tags) ? tags.join(', ') : tags || ''}
                  onChange={(tag) => handleAddTag(tag)}
                />
               {tagErrMsg && <div className="tagErrMsg">{tagErrMsg}</div>}
