@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 });
 
 const port = process.env.PORT || 5000;
-const MONGODB_URL = 'mongodb+srv://mahmut:123@cluster0.fj6ga7f.mongodb.net/?retryWrites=true&w=majority'
+const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://localhost:27017/todoapp'
 mongoose
 .connect(MONGODB_URL)
 .then(() => {
