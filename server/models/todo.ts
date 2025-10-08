@@ -52,26 +52,6 @@ Todo.init(
     tags: {
       type: DataTypes.JSON,
       allowNull: true,
-      get(): string[] | null {
-        const rawValue = this.getDataValue('tags') as any;
-        if (rawValue && typeof rawValue === 'string') {
-          try {
-            return JSON.parse(rawValue);
-          } catch (e) {
-            return rawValue.split(',').filter((tag: string) => tag.trim());
-          }
-        }
-        return rawValue;
-      },
-      set(value: string[] | string | null): void {
-        if (Array.isArray(value)) {
-          this.setDataValue('tags', JSON.stringify(value));
-        } else if (typeof value === 'string') {
-          this.setDataValue('tags', value);
-        } else {
-          this.setDataValue('tags', null);
-        }
-      }
     },
     imageFile: {
       type: DataTypes.TEXT('long'),
