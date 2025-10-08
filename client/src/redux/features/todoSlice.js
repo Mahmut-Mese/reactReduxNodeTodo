@@ -102,94 +102,92 @@ const todoSlice = createSlice({
       state.currentPage = action.payload;
     },
   },
-  extraReducers: {
-    [createTodo.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [createTodo.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.todos = [action.payload];
-    },
-    [createTodo.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload.message;
-    },
-    [getTodo.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [getTodo.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.todo = action.payload;
-    },
-    [getTodo.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload.message;
-    },
-    [getTodosByUser.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [getTodosByUser.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.userTodos = action.payload.data;
-      state.numberOfPages = action.payload.numberOfPages;
-      state.currentPage = action.payload.currentPage;
-    },
-    [getTodosByUser.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload.message;
-    },
-    [deleteTodo.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [deleteTodo.fulfilled]: (state, action) => {
-      state.loading = false;
-      const {
-        arg: { id },
-      } = action.meta;
-      if (id) {
-        state.userTodos = state.userTodos.filter((item) => item._id !== id);
-        state.todos = state.todos.filter((item) => item._id !== id);
-      }
-    },
-    [deleteTodo.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload.message;
-    },
-    [updateTodo.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [updateTodo.fulfilled]: (state, action) => {
-      state.loading = false;
-      const {
-        arg: { id },
-      } = action.meta;
-      if (id) {
-        state.userTodos = state.userTodos.map((item) =>
-          item._id === id ? action.payload : item
-        );
-        state.todos = state.todos.map((item) =>
-          item._id === id ? action.payload : item
-        );
-      }
-    },
-    [updateTodo.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload.message;
-    },
-
-
-    [searchTodos.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [searchTodos.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.searches = action.payload;
-
-    },
-    [searchTodos.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload.message;
-    }
+  extraReducers: (builder) => {
+    builder
+      .addCase(createTodo.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        state.todos = [action.payload];
+      })
+      .addCase(createTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message;
+      })
+      .addCase(getTodo.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        state.todo = action.payload;
+      })
+      .addCase(getTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message;
+      })
+      .addCase(getTodosByUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getTodosByUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userTodos = action.payload.data;
+        state.numberOfPages = action.payload.numberOfPages;
+        state.currentPage = action.payload.currentPage;
+      })
+      .addCase(getTodosByUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message;
+      })
+      .addCase(deleteTodo.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        const {
+          arg: { id },
+        } = action.meta;
+        if (id) {
+          state.userTodos = state.userTodos.filter((item) => item._id !== id);
+          state.todos = state.todos.filter((item) => item._id !== id);
+        }
+      })
+      .addCase(deleteTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message;
+      })
+      .addCase(updateTodo.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        const {
+          arg: { id },
+        } = action.meta;
+        if (id) {
+          state.userTodos = state.userTodos.map((item) =>
+            item._id === id ? action.payload : item
+          );
+          state.todos = state.todos.map((item) =>
+            item._id === id ? action.payload : item
+          );
+        }
+      })
+      .addCase(updateTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message;
+      })
+      .addCase(searchTodos.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(searchTodos.fulfilled, (state, action) => {
+        state.loading = false;
+        state.searches = action.payload;
+      })
+      .addCase(searchTodos.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message;
+      });
   },
 });
 

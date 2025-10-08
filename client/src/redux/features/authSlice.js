@@ -44,32 +44,32 @@ const authSlice = createSlice({
       state.user = null;
     },
   },
-  extraReducers: {
-    [login.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [login.fulfilled]: (state, action) => {
-      state.loading = false;
-      localStorage.setItem("profile", JSON.stringify({ ...action.payload }));
-      state.user = action.payload;
-    },
-    [login.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload.message;
-    },
-    [register.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [register.fulfilled]: (state, action) => {
-      state.loading = false;
-      localStorage.setItem("profile", JSON.stringify({ ...action.payload }));
-      state.user = action.payload;
-    },
-    [register.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload.message;
-    }
-   
+  extraReducers: (builder) => {
+    builder
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(login.fulfilled, (state, action) => {
+        state.loading = false;
+        localStorage.setItem("profile", JSON.stringify({ ...action.payload }));
+        state.user = action.payload;
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message;
+      })
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.loading = false;
+        localStorage.setItem("profile", JSON.stringify({ ...action.payload }));
+        state.user = action.payload;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message;
+      });
   },
 });
 
