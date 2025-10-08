@@ -1,13 +1,22 @@
 import React from "react";
 import { MDBPagination, MDBPaginationItem, MDBBtn } from "mdb-react-ui-kit";
+import { AppDispatch } from "../redux/store";
+import { setCurrentPage } from "../redux/features/todoSlice";
 
-const Pagination = ({
+interface PaginationProps {
+  setCurrentPage: typeof setCurrentPage;
+  currentPage: number;
+  numberOfPages: number | null;
+  dispatch: AppDispatch;
+}
+
+const Pagination: React.FC<PaginationProps> = ({
   setCurrentPage,
   currentPage,
   numberOfPages,
   dispatch,
-}) => {
-  const renderPagination = () => {
+}): React.JSX.Element => {
+  const renderPagination = (): React.JSX.Element | null => {
     if (currentPage === numberOfPages && currentPage === 1) return null;
     if (currentPage === 1) {
       return (

@@ -13,8 +13,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { register } from "../redux/features/authSlice";
+import { RootState, AppDispatch } from "../redux/store";
+import { RegisterCredentials } from "../types";
 
-const initialState = {
+interface RegisterFormData extends RegisterCredentials {
+  confirmPassword: string;
+}
+
+const initialState: RegisterFormData = {
   firstName: "",
   lastName: "",
   email: "",
@@ -22,30 +28,35 @@ const initialState = {
   confirmPassword: "",
 };
 
-const Register = () => {
-  const [formValue, setFormValue] = useState(initialState);
-  const { loading, error } = useSelector((state) => ({ ...state.auth }));
+const Register: React.FC = (): React.JSX.Element => {
+  const [formValue, setFormValue] = useState<RegisterFormData>(initialState);
+  const { loading, error } = useSelector((state: RootState) => state.auth);
   const { email, password, firstName, lastName, confirmPassword } = formValue;
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   useEffect(() => {
-    error && toast.error(error);
+    if (error) {
+      toast.error(error);
+    }
   }, [error]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      return toast.error("Password should match");
+      toast.error("Password should match");
+      return;
     }
     if (email && password && firstName && lastName && confirmPassword) {
-      dispatch(register({ formValue, navigate, toast }));
+      dispatch(register({ formValue, navigate }));
     }
   };
-  const onInputChange = (e) => {
-    let { name, value } = e.target;
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
     setFormValue({ ...formValue, [name]: value });
   };
+
   return (
     <div
       style={{

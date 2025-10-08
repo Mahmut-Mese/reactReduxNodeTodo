@@ -1,104 +1,118 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as api from "../api";
+import { Todo, TodoState, CreateTodoData, NavigateFunction } from "../../types";
 
-export const createTodo = createAsyncThunk(
+interface CreateTodoParams {
+  updatedTodoData: CreateTodoData;
+  navigate: NavigateFunction;
+}
+
+interface GetTodosByUserParams {
+  userId: number;
+  currentPage: number;
+}
+
+interface DeleteTodoParams {
+  id: number;
+}
+
+interface UpdateTodoParams {
+  id: number;
+  updatedTodoData: CreateTodoData;
+  navigate: NavigateFunction;
+}
+
+export const createTodo = createAsyncThunk<Todo, CreateTodoParams, { rejectValue: string }>(
   "todo/createTodo",
   async ({ updatedTodoData, navigate }, { rejectWithValue }) => {
     try {
       const response = await api.createTodo(updatedTodoData);
       navigate("/");
       return response.data;
-    } catch (err) {
-      return rejectWithValue(err.response.data);
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to create todo");
     }
   }
 );
 
- 
-
-export const getTodo = createAsyncThunk(
+export const getTodo = createAsyncThunk<Todo, number, { rejectValue: string }>(
   "todo/getTodo",
   async (id, { rejectWithValue }) => {
     try {
       const response = await api.getTodo(id);
       return response.data;
-    } catch (err) {
-      return rejectWithValue(err.response.data);
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to get todo");
     }
   }
 );
 
- 
-
-export const getTodosByUser = createAsyncThunk(
- 
+export const getTodosByUser = createAsyncThunk<{ data: Todo[]; currentPage: number; totalTodos: number; numberOfPages: number }, GetTodosByUserParams, { rejectValue: string }>(
   "todo/getTodosByUser",
-  async ({userId, currentPage }, { rejectWithValue }) => {
+  async ({ userId, currentPage }, { rejectWithValue }) => {
     try {
-    //  console.log(currentPage);
       const response = await api.getTodosByUser(userId, currentPage);
       return response.data;
-    } catch (err) {
-      return rejectWithValue(err.response.data);
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to get user todos");
     }
   }
 );
 
-export const deleteTodo = createAsyncThunk(
+export const deleteTodo = createAsyncThunk<{ message: string }, DeleteTodoParams, { rejectValue: string }>(
   "todo/deleteTodo",
   async ({ id }, { rejectWithValue }) => {
     try {
       const response = await api.deleteTodo(id);
       return response.data;
-    } catch (err) {
-      return rejectWithValue(err.response.data);
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to delete todo");
     }
   }
 );
 
-export const updateTodo = createAsyncThunk(
+export const updateTodo = createAsyncThunk<Todo, UpdateTodoParams, { rejectValue: string }>(
   "todo/updateTodo",
   async ({ id, updatedTodoData, navigate }, { rejectWithValue }) => {
     try {
       const response = await api.updateTodo(updatedTodoData, id);
       navigate("/");
       return response.data;
-    } catch (err) {
-      return rejectWithValue(err.response.data);
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to update todo");
     }
   }
 );
 
-export const searchTodos = createAsyncThunk(
+export const searchTodos = createAsyncThunk<Todo[], string, { rejectValue: string }>(
   "todo/searchTodos",
   async (searchQuery, { rejectWithValue }) => {
     try {
       const response = await api.getTodosBySearch(searchQuery);
       console.log(response.data);
       return response.data;
-    } catch (err) {
-      return rejectWithValue(err.response.data);
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to search todos");
     }
   }
 );
 
- 
- 
+const initialState: TodoState = {
+  todo: null,
+  todos: [],
+  userTodos: [],
+  searches: [],
+  currentPage: 1,
+  numberOfPages: null,
+  error: "",
+  loading: false,
+};
 
 const todoSlice = createSlice({
   name: "todo",
-  initialState: {
-    todo: {},
-    todos: [],
-    userTodos: [],
-    searches: [],
-    currentPage: 1,
-    numberOfPages: null,
-    error: "",
-    loading: false,
-  },
+  initialState,
   reducers: {
-    setCurrentPage: (state, action) => {
+    setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload;
     },
   },
@@ -113,7 +127,7 @@ const todoSlice = createSlice({
       })
       .addCase(createTodo.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload || "Failed to create todo";
       })
       .addCase(getTodo.pending, (state) => {
         state.loading = true;
@@ -124,7 +138,7 @@ const todoSlice = createSlice({
       })
       .addCase(getTodo.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload || "Failed to get todo";
       })
       .addCase(getTodosByUser.pending, (state) => {
         state.loading = true;
@@ -137,7 +151,7 @@ const todoSlice = createSlice({
       })
       .addCase(getTodosByUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload || "Failed to get user todos";
       })
       .addCase(deleteTodo.pending, (state) => {
         state.loading = true;
@@ -154,7 +168,7 @@ const todoSlice = createSlice({
       })
       .addCase(deleteTodo.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload || "Failed to delete todo";
       })
       .addCase(updateTodo.pending, (state) => {
         state.loading = true;
@@ -175,7 +189,7 @@ const todoSlice = createSlice({
       })
       .addCase(updateTodo.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload || "Failed to update todo";
       })
       .addCase(searchTodos.pending, (state) => {
         state.loading = true;
@@ -186,7 +200,7 @@ const todoSlice = createSlice({
       })
       .addCase(searchTodos.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload || "Failed to search todos";
       });
   },
 });

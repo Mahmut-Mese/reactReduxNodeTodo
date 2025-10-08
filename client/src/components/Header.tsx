@@ -12,23 +12,32 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { setLogout } from "../redux/features/authSlice";
 import decode from "jwt-decode";
+import { RootState, AppDispatch } from "../redux/store";
 
-const Header = () => {
-  const [show, setShow] = useState(false);
-  const { user } = useSelector((state) => ({ ...state.auth }));
-  const dispatch = useDispatch();
+interface DecodedToken {
+  exp: number;
+  [key: string]: any;
+}
+
+const Header: React.FC = (): React.JSX.Element => {
+  const [show, setShow] = useState<boolean>(false);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>();
   const token = user?.token;
 
   if (token) {
-    const decodedToken = decode(token);
-    if (decodedToken.exp * 1000 < new Date().getTime()) {
+    try {
+      const decodedToken: DecodedToken = decode(token);
+      if (decodedToken.exp * 1000 < new Date().getTime()) {
+        dispatch(setLogout());
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
       dispatch(setLogout());
     }
   }
 
-
-
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     dispatch(setLogout());
   };
 

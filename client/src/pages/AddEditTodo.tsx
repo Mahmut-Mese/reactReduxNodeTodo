@@ -10,32 +10,32 @@ import FileBase from "react-file-base64";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { createTodo, updateTodo, getTodo } from "../redux/features/todoSlice";
+import { RootState, AppDispatch } from "../redux/store";
+import { TodoFormData } from "../types";
 
-const initialState = {
+const initialState: TodoFormData = {
   title: "",
   description: "",
   tags: [],
 };
 
-const AddEditTodo = () => {
-  const [todoData, setTodoData] = useState(initialState);
-  const [tagErrMsg, setTagErrMsg] = useState(null);
-  const { userTodos, todo } = useSelector((state) => ({
-    ...state.todo,
-  }));
-  const { user } = useSelector((state) => ({ ...state.auth }));
-  const dispatch = useDispatch();
+const AddEditTodo: React.FC = (): React.JSX.Element => {
+  const [todoData, setTodoData] = useState<TodoFormData>(initialState);
+  const [tagErrMsg, setTagErrMsg] = useState<string | null>(null);
+  const { userTodos, todo } = useSelector((state: RootState) => state.todo);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   const { title, description, tags } = todoData;
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
     if (id) {
       let singleTodo = userTodos.find((todo) => todo.id === parseInt(id));
       
       if (!singleTodo) {
-        dispatch(getTodo(id));
+        dispatch(getTodo(parseInt(id)));
         return;
       }
       
@@ -64,9 +64,7 @@ const AddEditTodo = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [todo, id]);
 
- 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (tags.length <= 0) {
       setTagErrMsg("Please provide some tags");
@@ -77,16 +75,18 @@ const AddEditTodo = () => {
       if (!id) {
         dispatch(createTodo({ updatedTodoData, navigate }));
       } else {
-        dispatch(updateTodo({ id, updatedTodoData, navigate }));
+        dispatch(updateTodo({ id: parseInt(id), updatedTodoData, navigate }));
       }
       handleClear();
     }
   };
-  const onInputChange = (e) => {
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setTodoData({ ...todoData, [name]: value });
   };
-  const handleAddTag = (tag) => {
+
+  const handleAddTag = (tag: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = tag.target;
     
     const tagsArray = value.split(',').map(tag => tag.trim()).filter(tag => tag);
@@ -95,9 +95,10 @@ const AddEditTodo = () => {
     setTagErrMsg(null);
   };
 
-  const handleClear = () => {
+  const handleClear = (): void => {
     setTodoData({ title: "", description: "", tags: [] });
   };
+
   return (
     <div
       style={{
@@ -144,19 +145,19 @@ const AddEditTodo = () => {
             <div className="col-md-12">
               <MDBInput
                 type="text"
-                 name="tags"
-                 placeholder="Enter Tags (comma-separated)"
-                 className="form-control"
-                 value={Array.isArray(tags) ? tags.join(', ') : tags || ''}
-                 onChange={(tag) => handleAddTag(tag)}
-               />
+                name="tags"
+                placeholder="Enter Tags (comma-separated)"
+                className="form-control"
+                value={Array.isArray(tags) ? tags.join(', ') : tags || ''}
+                onChange={handleAddTag}
+              />
               {tagErrMsg && <div className="tagErrMsg">{tagErrMsg}</div>}
             </div>
             <div className="d-flex justify-content-start">
               <FileBase
                 type="file"
                 multiple={false}
-                onDone={({ base64 }) =>
+                onDone={({ base64 }: { base64: string }) =>
                   setTodoData({ ...todoData, imageFile: base64 })
                 }
               />

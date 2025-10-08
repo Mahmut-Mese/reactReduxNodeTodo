@@ -13,40 +13,39 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { login } from "../redux/features/authSlice";
+import { RootState, AppDispatch } from "../redux/store";
+import { LoginCredentials } from "../types";
 
-const initialState = {
+const initialState: LoginCredentials = {
   email: "",
   password: "",
 };
 
-const Login = () => {
-  const [formValue, setFormValue] = useState(initialState);
-  const { loading, error } = useSelector((state) => ({ ...state.auth }));
+const Login: React.FC = (): React.JSX.Element => {
+  const [formValue, setFormValue] = useState<LoginCredentials>(initialState);
+  const { loading, error } = useSelector((state: RootState) => state.auth);
   const { email, password } = formValue;
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   useEffect(() => {
-    error && toast.error(error);
+    if (error) {
+      toast.error(error);
+    }
   }, [error]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (email && password) {
-      dispatch(login({ formValue, navigate, toast }));
+      dispatch(login({ formValue, navigate }));
     }
   };
-  const onInputChange = (e) => {
-    let { name, value } = e.target;
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
     setFormValue({ ...formValue, [name]: value });
   };
 
-
-
-  
-
-  
- 
   return (
     <div
       style={{
@@ -101,7 +100,6 @@ const Login = () => {
             </div>
           </MDBValidation>
           <br />
-  
         </MDBCardBody>
         <MDBCardFooter>
           <Link to="/register">

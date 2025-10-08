@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   MDBCard,
   MDBCardTitle,
@@ -13,72 +13,63 @@ import {
 } from "mdb-react-ui-kit";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { deleteTodo, getTodosByUser } from "../redux/features/todoSlice";
-import { setCurrentPage } from "../redux/features/todoSlice";
+import { deleteTodo, getTodosByUser, setCurrentPage, searchTodos } from "../redux/features/todoSlice";
 import Pagination from "../components/Pagination";
-import { searchTodos } from "../redux/features/todoSlice";
-import { useState } from "react";
+import { RootState, AppDispatch } from "../redux/store";
+import { Todo } from "../types";
 
+const Dashboard: React.FC = (): React.JSX.Element => {
+  const [search, setSearch] = useState<string>("");
+  const [currentTodos, setCurrent] = useState<Todo[] | undefined>(undefined);
 
-const Dashboard = () => {
-  const [search, setSearch] = useState("");
-
-  const { user } = useSelector((state) => ({ ...state.auth }));
-  const { userTodos, currentPage, searches } = useSelector(
-    (state) => ({ ...state.todo })
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { userTodos, currentPage, searches, numberOfPages } = useSelector(
+    (state: RootState) => state.todo
   );
-  const { numberOfPages } = useSelector((state) => ({ ...state.todo }));
-  const [currentTodos, setCurrent] = useState();
- 
 
   const userId = user?.result?.id;
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     setCurrent(userTodos);
-  },[userTodos]);
+  }, [userTodos]);
 
   useEffect(() => {
     if (search.length >= 2) {
-  setCurrent(searches);
+      setCurrent(searches);
     }
-   // eslint-disable-next-line
-  },[searches]);
-
-
+    // eslint-disable-next-line
+  }, [searches]);
 
   useEffect(() => {
     if (userId) {
       dispatch(getTodosByUser({ userId, currentPage }));
-
     }
-     // eslint-disable-next-line
-  }, [currentPage]);
+    // eslint-disable-next-line
+  }, [currentPage, userId, dispatch]);
 
   useEffect(() => {
-     // eslint-disable-next-line
+    // eslint-disable-next-line
     if (search.length >= 2) {
       dispatch(searchTodos(search));
     } else if (search.length < 2) {
       setCurrent(userTodos);
     }
-     // eslint-disable-next-line
-  }, [search,currentPage]);
-  const excerpt = (str) => {
+    // eslint-disable-next-line
+  }, [search, currentPage, dispatch, userTodos]);
+
+  const excerpt = (str: string): string => {
     if (str.length > 40) {
       str = str.substring(0, 40) + " ...";
     }
     return str;
   };
 
-
-  const handleDelete = (id) => {
+  const handleDelete = (id: number): void => {
     if (window.confirm("Are you sure you want to delete this todo ?")) {
       dispatch(deleteTodo({ id }));
     }
   };
-
-
 
   return (
     <div
@@ -90,15 +81,15 @@ const Dashboard = () => {
       }}
     >
       <div
-      style={{
-        height: "75px",
-        position: "relative",
-      }}
-    >
-        <MDBBtn href="/AddTodo" style={{ width: "auto",marginBottom:"20px",position:"absolute",right:"0" }}>
-                { "Add New" }
-              </MDBBtn>
-              </div>
+        style={{
+          height: "75px",
+          position: "relative",
+        }}
+      >
+        <MDBBtn href="/AddTodo" style={{ width: "auto", marginBottom: "20px", position: "absolute", right: "0" }}>
+          {"Add New"}
+        </MDBBtn>
+      </div>
       <form className="d-flex input-group w-auto mb-2">
         <input
           type="text"
@@ -107,16 +98,12 @@ const Dashboard = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-      
       </form>
-    
-
-  
 
       {currentTodos &&
         currentTodos.length > 0 &&
         currentTodos.map((item) => (
-                <MDBCardGroup key={item.id}>
+          <MDBCardGroup key={item.id}>
             <MDBCard style={{ maxWidth: "680px" }} className="mt-2">
               <MDBRow className="g-0">
                 <MDBCol md="3">
@@ -180,7 +167,7 @@ const Dashboard = () => {
             </MDBCard>
           </MDBCardGroup>
         ))}
-      {currentTodos?.length > 0 && !search  &&(
+      {currentTodos && currentTodos.length > 0 && !search && (
         <Pagination
           setCurrentPage={setCurrentPage}
           numberOfPages={numberOfPages}

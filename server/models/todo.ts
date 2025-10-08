@@ -1,8 +1,32 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../db.js";
+import { DataTypes, Model } from "sequelize";
+import sequelize from "../db";
+import { ITodo, ITodoInput } from "../types";
 
-const Todo = sequelize.define(
-  "Todo",
+interface TodoCreationAttributes {
+  id?: number;
+  title: string;
+  description: string;
+  name?: string;
+  creator: number;
+  tags: string[];
+  imageFile?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+class Todo extends Model<ITodo, TodoCreationAttributes> implements ITodo {
+  public id!: number;
+  public title!: string;
+  public description!: string;
+  public name?: string;
+  public creator!: number;
+  public tags!: string[];
+  public imageFile?: string;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
+
+Todo.init(
   {
     id: {
       type: DataTypes.INTEGER.UNSIGNED,
@@ -28,18 +52,18 @@ const Todo = sequelize.define(
     tags: {
       type: DataTypes.JSON,
       allowNull: true,
-      get() {
-        const rawValue = this.getDataValue('tags');
+      get(): string[] | null {
+        const rawValue = this.getDataValue('tags') as any;
         if (rawValue && typeof rawValue === 'string') {
           try {
             return JSON.parse(rawValue);
           } catch (e) {
-            return rawValue.split(',').filter(tag => tag.trim());
+            return rawValue.split(',').filter((tag: string) => tag.trim());
           }
         }
         return rawValue;
       },
-      set(value) {
+      set(value: string[] | string | null): void {
         if (Array.isArray(value)) {
           this.setDataValue('tags', JSON.stringify(value));
         } else if (typeof value === 'string') {
@@ -55,6 +79,7 @@ const Todo = sequelize.define(
     },
   },
   {
+    sequelize,
     tableName: "todos",
     timestamps: true,
     underscored: true,

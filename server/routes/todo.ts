@@ -1,7 +1,5 @@
 import express from "express";
-const router = express.Router();
-import auth from "../middleware/auth.js";
-
+import auth from "../middleware/auth";
 import {
   createTodo,
   deleteTodo,
@@ -9,7 +7,9 @@ import {
   getTodosBySearch,
   getTodosByUser,
   updateTodo,
-} from "../controllers/todo.js";
+} from "../controllers/todo";
+
+const router = express.Router();
 
 router.get("/search", getTodosBySearch);
 router.get("/:id", getTodo);

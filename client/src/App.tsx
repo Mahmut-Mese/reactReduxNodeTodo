@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import { ToastContainer } from "react-toastify";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -12,17 +12,24 @@ import AddEditTodo from "./pages/AddEditTodo";
 import SingleTodo from "./pages/SingleTodo";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
+import { AuthUser } from "./types";
 
-function App() {
+function App(): React.JSX.Element {
   const dispatch = useDispatch();
   
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("profile"));
-    if (user) {
-      dispatch(setUser(user));
+    const userString = localStorage.getItem("profile");
+    if (userString) {
+      try {
+        const user: AuthUser = JSON.parse(userString);
+        dispatch(setUser(user));
+      } catch (error) {
+        console.error("Error parsing user from localStorage:", error);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
   return (
     <BrowserRouter>
       <div className="App">
