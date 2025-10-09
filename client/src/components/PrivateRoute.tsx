@@ -9,7 +9,8 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }): React.JSX.Element => {
   const { user } = useSelector((state: RootState) => state.auth);
-  return user ? <>{children}</> : <Login />;
+  const hasStoredUser = typeof window !== 'undefined' && !!localStorage.getItem('profile');
+  return user || hasStoredUser ? <>{children}</> : <Login />;
 };
 
 export default PrivateRoute;

@@ -1,0 +1,6 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "video": false,
+  "screenshotOnRunFailure": true,
+  "supportFile": "cypress/support/index.ts"
+}

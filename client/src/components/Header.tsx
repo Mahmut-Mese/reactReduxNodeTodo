@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MDBNavbar,
   MDBContainer,
@@ -20,35 +20,51 @@ interface DecodedToken {
 }
 
 const Header: React.FC = (): React.JSX.Element => {
-  const [show, setShow] = useState<boolean>(false);
+  console.log('=== HEADER COMPONENT RENDERING ===');
+  
+  const [show, setShow] = useState(false);
   const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
-  const token = user?.token;
+  
+  // Check authentication status
+  const isAuthenticated = user?.result?.id || (typeof window !== 'undefined' && !!localStorage.getItem('profile'));
+  
+  console.log('Header Debug:', {
+    user: user,
+    isAuthenticated: isAuthenticated,
+    hasLocalStorage: typeof window !== 'undefined' && !!localStorage.getItem('profile')
+  });
 
-  if (token) {
-    try {
-      const decodedToken: DecodedToken = decode(token);
-      if (decodedToken.exp * 1000 < new Date().getTime()) {
+  // Check token expiration
+  useEffect(() => {
+    if (user?.token) {
+      try {
+        const decodedToken: DecodedToken = decode(user.token);
+        const currentTime = new Date().getTime();
+        const tokenExpiry = decodedToken.exp * 1000;
+        
+        if (tokenExpiry < currentTime) {
+          console.log('Token expired, logging out');
+          dispatch(setLogout());
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
         dispatch(setLogout());
       }
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      dispatch(setLogout());
     }
-  }
+  }, [user?.token, dispatch]);
 
   const handleLogout = (): void => {
     dispatch(setLogout());
   };
 
   return (
-    <MDBNavbar fixed="top" expand="lg" style={{ backgroundColor: "#f0e6ea",  minHeight: '45px' }}>
+    <MDBNavbar fixed="top" expand="lg" style={{ backgroundColor: "#f0e6ea", minHeight: '45px' }}>
       <MDBContainer>
-      
         <MDBNavbarToggler
           type="button"
           aria-expanded="false"
-          aria-label="Toogle navigation"
+          aria-label="Toggle navigation"
           onClick={() => setShow(!show)}
           style={{ color: "#606080" }}
         >
@@ -56,14 +72,13 @@ const Header: React.FC = (): React.JSX.Element => {
         </MDBNavbarToggler>
         <MDBCollapse show={show} navbar>
           <MDBNavbarNav right fullWidth={false} className="mb-2 mb-lg-0">
-            
-          <MDBNavbarItem>
+            <MDBNavbarItem>
               <MDBNavbarLink href="/">
                 <p className="header-text">Home</p>
               </MDBNavbarLink>
             </MDBNavbarItem>
            
-            {user?.result?.id ? (
+            {isAuthenticated ? (
               <MDBNavbarItem>
                 <MDBNavbarLink href="/login">
                   <p className="header-text" onClick={() => handleLogout()}>
@@ -79,7 +94,6 @@ const Header: React.FC = (): React.JSX.Element => {
               </MDBNavbarItem>
             )}
           </MDBNavbarNav>
-         
         </MDBCollapse>
       </MDBContainer>
     </MDBNavbar>

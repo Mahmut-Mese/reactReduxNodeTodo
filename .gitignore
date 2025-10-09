@@ -89,3 +89,7 @@ public
 # Temporary folders
 tmp/
 temp/
+
+# Cypress
+client/cypress/screenshots/
+client/cypress/videos/

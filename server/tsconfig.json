@@ -10,12 +10,11 @@
     "skipLibCheck": true,
     "moduleResolution": "node",
     "typeRoots": ["./node_modules/@types", "./types"],
-    "types": [],
+    "types": ["jest", "node"],
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "sourceMap": true,
     "removeComments": true,
     "noImplicitAny": false,
     "noImplicitReturns": false,
@@ -33,6 +32,7 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "cypress/**/*"
   ]
 }
